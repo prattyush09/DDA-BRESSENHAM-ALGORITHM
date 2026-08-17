@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CG Algorithm Lab — DDA Line & Bresenham Circle Visualizer</title>
+    <!-- Modern Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>CG ALGORITHM LAB</h1>
+                    <p>Computer Graphics Algorithm Visualizer &bull; MSBTE Microproject</p>
+                </div>
+            </div>
+
+            <!-- TAB NAVIGATION -->
+            <nav class="app-nav">
+                <button class="nav-tab active" data-tab="dashboard-tab">
+                    <span class="nav-icon">🏠</span> Dashboard
+                </button>
+                <button class="nav-tab" data-tab="dda-tab">
+                    <span class="nav-icon">📈</span> DDA Line
+                </button>
+                <button class="nav-tab" data-tab="bresenham-tab">
+                    <span class="nav-icon">⭕</span> Bresenham Circle
+                </button>
+            </nav>
+
+            <div class="header-status">
+                <span class="status-indicator online" id="serverStatusBadge">
+                    <span class="status-dot"></span> Flask API Online
+                </span>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="app-main">
+
+            <!-- TAB 1: DASHBOARD / HOME -->
+            <section id="dashboard-tab" class="tab-content active">
+                <div class="dashboard-hero">
+                    <div class="hero-badge">MSBTE DIPLOMA COMPUTER GRAPHICS MICROPROJECT</div>
+                    <h2>Interactive Algorithm Rasterization Laboratory</h2>
+                    <p>Understand step-by-step pixel calculation logic for line and circle generation algorithms without relying on built-in canvas drawing calls.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- CARD 1: DDA LINE -->
+                    <div class="algo-card">
+                        <div class="card-header">
+                            <span class="card-icon dda-icon">📈</span>
+                            <span class="algo-tag">Line Rasterization</span>
+                        </div>
+                        <h3>DDA Line Algorithm</h3>
+                        <p>Digital Differential Analyzer calculates intermediate pixel positions incrementally using calculated X and Y step increments based on line slope.</p>
+                        <div class="card-features">
+                            <span><strong style="color:var(--sky-400)">Key Concept:</strong> Floating point increments &amp; rounding</span>
+                            <span><strong style="color:var(--sky-400)">Formula:</strong> &Delta;X = dx/steps, &Delta;Y = dy/steps</span>
+                        </div>
+                        <button class="btn btn-primary btn-block open-tab-btn" data-target="dda-tab">
+                            Launch DDA Visualizer &rarr;
+                        </button>
+                    </div>
+
+                    <!-- CARD 2: BRESENHAM CIRCLE -->
+                    <div class="algo-card">
+                        <div class="card-header">
+                            <span class="card-icon bres-icon">⭕</span>
+                            <span class="algo-tag">Circle Rasterization</span>
+                        </div>
+                        <h3>Bresenham Circle Algorithm</h3>
+                        <p>Integer-based circle generation visualizer utilizing decision parameters (P = 3 - 2r) and 8-way circular symmetry for zero floating-point overhead.</p>
+                        <div class="card-features">
+                            <span><strong style="color:var(--purple-400)">Key Concept:</strong> 8-Way Symmetry &amp; Integer Math</span>
+                            <span><strong style="color:var(--purple-400)">Formula:</strong> P<sub>0</sub> = 3 - 2r</span>
+                        </div>
+                        <button class="btn btn-purple btn-block open-tab-btn" data-target="bresenham-tab">
+                            Launch Bresenham Visualizer &rarr;
+                        </button>
+                    </div>
+                </div>
+
+
+            </section>
+
+            <!-- TAB 2: DDA LINE VISUALIZER -->
+            <section id="dda-tab" class="tab-content">
+                <div class="workspace-layout">
+                    <!-- SIDEBAR PANEL -->
+                    <aside class="sidebar-panel">
+                        <div class="panel-section">
+                            <h3 class="panel-title"><span class="title-icon">⚙️</span> Input Parameters</h3>
+                            <form id="ddaForm" onsubmit="return false;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="dda_x1">X1 (Start X)</label>
+                                        <input type="number" id="dda_x1" value="10" step="any" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dda_y1">Y1 (Start Y)</label>
+                                        <input type="number" id="dda_y1" value="10" step="any" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="dda_x2">X2 (End X)</label>
+                                        <input type="number" id="dda_x2" value="80" step="any" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dda_y2">Y2 (End Y)</label>
+                                        <input type="number" id="dda_y2" value="50" step="any" required>
+                                    </div>
+                                </div>
+                                <div class="preset-container">
+                                    <span class="preset-label">Presets:</span>
+                                    <button type="button" class="btn-chip" onclick="loadDdaPreset(10, 10, 80, 50)">Standard</button>
+                                    <button type="button" class="btn-chip" onclick="loadDdaPreset(10, 30, 90, 30)">Horizontal</button>
+                                    <button type="button" class="btn-chip" onclick="loadDdaPreset(40, 10, 40, 90)">Vertical</button>
+                                    <button type="button" class="btn-chip" onclick="loadDdaPreset(10, 80, 80, 20)">Negative Slope</button>
+                                    <button type="button" class="btn-chip" onclick="loadDdaPreset(-30, -20, 40, 50)">Negative Coords</button>
+                                </div>
+                                <button type="submit" id="ddaSubmitBtn" class="btn btn-primary btn-block">
+                                    Calculate &amp; Load DDA
+                                </button>
+                                <div id="ddaError" class="error-badge hidden"></div>
+                            </form>
+                        </div>
+
+                        <!-- PLAYBACK CONTROLS -->
+                        <div class="panel-section">
+                            <h3 class="panel-title"><span class="title-icon">🎮</span> Animation Controls</h3>
+                            <div class="control-buttons">
+                                <button id="ddaPlayBtn" class="btn btn-success" disabled>▶ Play</button>
+                                <button id="ddaPauseBtn" class="btn btn-warning" disabled>⏸ Pause</button>
+                                <button id="ddaStepBtn" class="btn btn-info" disabled>⏭ Next Step</button>
+                                <button id="ddaResetBtn" class="btn btn-secondary" disabled>↻ Reset</button>
+                            </div>
+                            <div class="speed-control">
+                                <label for="ddaSpeedSlider">Speed: <span id="ddaSpeedValue">Normal (200ms)</span></label>
+                                <input type="range" id="ddaSpeedSlider" min="50" max="1000" step="50" value="200">
+                            </div>
+                        </div>
+
+                        <!-- ALGORITHM SUMMARY -->
+                        <div class="panel-section summary-box">
+                            <h4 class="summary-title">DDA Initial Formulas</h4>
+                            <div class="summary-list">
+                                <div><span>dx = X2 - X1</span><strong id="ddaSumDx">-</strong></div>
+                                <div><span>dy = Y2 - Y1</span><strong id="ddaSumDy">-</strong></div>
+                                <div><span>steps = max(|dx|,|dy|)</span><strong id="ddaSumSteps">-</strong></div>
+                                <div><span>X increment</span><strong id="ddaSumXInc">-</strong></div>
+                                <div><span>Y increment</span><strong id="ddaSumYInc">-</strong></div>
+                                <div><span>Slope (m)</span><strong id="ddaSumSlope">-</strong></div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- CANVAS & VISUALIZATION -->
+                    <div class="canvas-panel">
+                        <div class="canvas-toolbar">
+                            <div class="toolbar-info">
+                                <span class="canvas-title">Coordinate Grid Canvas</span>
+                                <span class="canvas-sub" id="ddaCanvasSub">Ready to visualize</span>
+                            </div>
+                            <div class="toolbar-actions">
+                                <button class="btn-icon" onclick="resetCanvasZoom('dda')" title="Reset Zoom">🎯</button>
+                                <span class="coords-badge" id="ddaMouseCoords">Hover X: -, Y: -</span>
+                            </div>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="ddaCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM CALCULATION & STEP TABLE PANEL -->
+                <div class="details-panel">
+                    <div class="calc-card">
+                        <h3>Current Step Breakdown</h3>
+                        <div class="calc-grid">
+                            <div class="calc-stat">
+                                <span class="stat-label">Current Step</span>
+                                <span class="stat-value" id="ddaCurrStep">0 / 0</span>
+                            </div>
+                            <div class="calc-stat">
+                                <span class="stat-label">Calculated Float (X, Y)</span>
+                                <span class="stat-value" id="ddaCurrFloat">(0.00, 0.00)</span>
+                            </div>
+                            <div class="calc-stat highlight">
+                                <span class="stat-label">Plotted Pixel (Round X, Round Y)</span>
+                                <span class="stat-value" id="ddaCurrPixel">(0, 0)</span>
+                            </div>
+                            <div class="calc-stat">
+                                <span class="stat-label">Calculation Detail</span>
+                                <span class="stat-value text-sm" id="ddaCurrDetail">Waiting to start...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP TABLE -->
+                    <div class="table-card">
+                        <div class="table-header">
+                            <h3>Step Iteration Table</h3>
+                            <span class="table-count" id="ddaTableCount">0 records</span>
+                        </div>
+                        <div class="table-scroll">
+                            <table id="ddaTable">
+                                <thead>
+                                    <tr>
+                                        <th>Step (k)</th>
+                                        <th>X (Float)</th>
+                                        <th>Y (Float)</th>
+                                        <th>Rounded X</th>
+                                        <th>Rounded Y</th>
+                                        <th>Calculation Trace</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="6" class="text-center text-muted">No data loaded yet. Click "Calculate &amp; Load DDA" to generate steps.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: BRESENHAM CIRCLE VISUALIZER -->
+            <section id="bresenham-tab" class="tab-content">
+                <div class="workspace-layout">
+                    <!-- SIDEBAR PANEL -->
+                    <aside class="sidebar-panel">
+                        <div class="panel-section">
+                            <h3 class="panel-title"><span class="title-icon">⚙️</span> Input Parameters</h3>
+                            <form id="bresenhamForm" onsubmit="return false;">
+                                <div class="form-group">
+                                    <label for="bres_xc">Center X (Xc)</label>
+                                    <input type="number" id="bres_xc" value="0" step="any" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bres_yc">Center Y (Yc)</label>
+                                    <input type="number" id="bres_yc" value="0" step="any" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bres_r">Radius (R)</label>
+                                    <input type="number" id="bres_r" value="30" min="1" step="any" required>
+                                </div>
+                                <div class="preset-container">
+                                    <span class="preset-label">Presets:</span>
+                                    <button type="button" class="btn-chip" onclick="loadBresenhamPreset(0, 0, 30)">Origin R=30</button>
+                                    <button type="button" class="btn-chip" onclick="loadBresenhamPreset(0, 0, 50)">Origin R=50</button>
+                                    <button type="button" class="btn-chip" onclick="loadBresenhamPreset(20, 20, 25)">Off-Center</button>
+                                    <button type="button" class="btn-chip" onclick="loadBresenhamPreset(0, 0, 12)">Small R=12</button>
+                                </div>
+                                <button type="submit" id="bresSubmitBtn" class="btn btn-purple btn-block">
+                                    Calculate &amp; Load Circle
+                                </button>
+                                <div id="bresError" class="error-badge hidden"></div>
+                            </form>
+                        </div>
+
+                        <!-- PLAYBACK CONTROLS -->
+                        <div class="panel-section">
+                            <h3 class="panel-title"><span class="title-icon">🎮</span> Animation Controls</h3>
+                            <div class="control-buttons">
+                                <button id="bresPlayBtn" class="btn btn-success" disabled>▶ Play</button>
+                                <button id="bresPauseBtn" class="btn btn-warning" disabled>⏸ Pause</button>
+                                <button id="bresStepBtn" class="btn btn-info" disabled>⏭ Next Step</button>
+                                <button id="bresResetBtn" class="btn btn-secondary" disabled>↻ Reset</button>
+                            </div>
+                            <div class="speed-control">
+                                <label for="bresSpeedSlider">Speed: <span id="bresSpeedValue">Normal (200ms)</span></label>
+                                <input type="range" id="bresSpeedSlider" min="50" max="1000" step="50" value="200">
+                            </div>
+                        </div>
+
+                        <!-- ALGORITHM SUMMARY -->
+                        <div class="panel-section summary-box purple-border">
+                            <h4 class="summary-title">Bresenham Initial Parameters</h4>
+                            <div class="summary-list">
+                                <div><span>Center (Xc, Yc)</span><strong id="bresSumCenter">-</strong></div>
+                                <div><span>Radius (R)</span><strong id="bresSumRadius">-</strong></div>
+                                <div><span>Initial Point</span><strong id="bresSumStart">-</strong></div>
+                                <div><span>Initial Decision P<sub>0</sub></span><strong id="bresSumP0">-</strong></div>
+                                <div><span>Total Iterations</span><strong id="bresSumIterations">-</strong></div>
+                                <div><span>Symmetry Points/Iter</span><strong id="bresSumSymmetry">8 Points</strong></div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- CANVAS & VISUALIZATION -->
+                    <div class="canvas-panel">
+                        <div class="canvas-toolbar">
+                            <div class="toolbar-info">
+                                <span class="canvas-title">8-Way Symmetry Coordinate Grid</span>
+                                <span class="canvas-sub" id="bresCanvasSub">Ready to visualize</span>
+                            </div>
+                            <div class="symmetry-legend">
+                                <span class="sym-tag oct-1">Oct 1</span>
+                                <span class="sym-tag oct-2">Oct 2</span>
+                                <span class="sym-tag oct-3">Oct 3</span>
+                                <span class="sym-tag oct-4">Oct 4</span>
+                                <span class="sym-tag oct-5">Oct 5</span>
+                                <span class="sym-tag oct-6">Oct 6</span>
+                                <span class="sym-tag oct-7">Oct 7</span>
+                                <span class="sym-tag oct-8">Oct 8</span>
+                            </div>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="bresenhamCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM CALCULATION & STEP TABLE PANEL -->
+                <div class="details-panel">
+                    <div class="calc-card purple-glow">
+                        <h3>Current Iteration &amp; 8-Way Symmetry Breakdown</h3>
+                        <div class="calc-grid">
+                            <div class="calc-stat">
+                                <span class="stat-label">Iteration (k)</span>
+                                <span class="stat-value" id="bresCurrStep">0 / 0</span>
+                            </div>
+                            <div class="calc-stat">
+                                <span class="stat-label">Current Offset (x, y)</span>
+                                <span class="stat-value" id="bresCurrXY">(0, 0)</span>
+                            </div>
+                            <div class="calc-stat highlight-purple">
+                                <span class="stat-label">Decision Parameter (P)</span>
+                                <span class="stat-value" id="bresCurrP">P = 0</span>
+                            </div>
+                            <div class="calc-stat">
+                                <span class="stat-label">Decision Choice</span>
+                                <span class="stat-value text-sm" id="bresCurrChoice">Waiting to start...</span>
+                            </div>
+                        </div>
+
+                        <!-- 8 SYMMETRY POINTS CHIP LIST -->
+                        <div class="symmetry-chips-container">
+                            <span class="chips-title">Generated 8 Symmetric Coordinates:</span>
+                            <div class="symmetry-chips-grid" id="bresSymmetryChips">
+                                <span class="chip-item text-muted">No step active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP TABLE -->
+                    <div class="table-card">
+                        <div class="table-header">
+                            <h3>Step Iteration Table</h3>
+                            <span class="table-count" id="bresTableCount">0 records</span>
+                        </div>
+                        <div class="table-scroll">
+                            <table id="bresTable">
+                                <thead>
+                                    <tr>
+                                        <th>Iter (k)</th>
+                                        <th>x</th>
+                                        <th>y</th>
+                                        <th>Decision P</th>
+                                        <th>Selected Pixel Choice</th>
+                                        <th>Next P</th>
+                                        <th>8-Way Symmetric Coordinates</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="7" class="text-center text-muted">No data loaded yet. Click "Calculate &amp; Load Circle" to generate steps.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <p>CG Algorithm Lab &bull; Computer Graphics Microproject &bull; MSBTE Diploma &bull; Built with Python Flask &amp; HTML5 Canvas</p>
+        </footer>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="{{ url_for('static', filename='js/canvas.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dda.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bresenham.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
