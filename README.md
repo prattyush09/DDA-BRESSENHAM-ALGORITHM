@@ -55,7 +55,7 @@ CG-Algorithm-Lab/
 
 1. **Navigate to the Project Folder**:
    ```bash
-   cd c:\Users\PRANITA\OneDrive\Desktop\CG-Algorithm-Lab
+  
    ```
 
 2. **Create a Virtual Environment**:
